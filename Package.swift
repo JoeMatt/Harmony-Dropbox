@@ -6,7 +6,9 @@ import PackageDescription
 let package = Package(
     name: "Harmony-Dropbox",
     platforms: [
-        .iOS(.v12)
+        .iOS(.v13),
+        .macCatalyst(.v13),
+        .macOS(.v13)
     ],
     products: [
         .library(
@@ -26,8 +28,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/dropbox/SwiftyDropbox.git", from: "9.1.0"),
-         .package(url: "https://github.com/JoeMatt/Harmony.git", from: "1.0.0")
-//        .package(path: "../Harmony")
+        .package(url: "https://github.com/JoeMatt/Harmony.git", from: "1.1.1")
     ],
     targets: [
         .target(

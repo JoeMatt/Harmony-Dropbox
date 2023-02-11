@@ -14,8 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/JoeMatt/Harmony.git",
       "state" : {
-        "revision" : "2d3df1c9ec5344e397e7a9f372aec1843ec0b856",
-        "version" : "1.0.0"
+        "revision" : "32cd550bfd7faea6b9d4a91d04dabd17386dcb1d",
+        "version" : "1.1.1"
       }
     },
     {
@@ -23,8 +23,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/JoeMatt/Roxas.git",
       "state" : {
-        "revision" : "25c99d86b7f9b663e5c42acbe655f65a07cf2bc9",
-        "version" : "1.0.2"
+        "revision" : "902171c1ddaa1b49294b3899d7230ef7c3a1c5ea",
+        "version" : "1.1.1"
       }
     },
     {
