@@ -10,21 +10,12 @@
       }
     },
     {
-      "identity" : "harmony",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/JoeMatt/Harmony.git",
-      "state" : {
-        "revision" : "32cd550bfd7faea6b9d4a91d04dabd17386dcb1d",
-        "version" : "1.1.1"
-      }
-    },
-    {
       "identity" : "roxas",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/JoeMatt/Roxas.git",
       "state" : {
-        "revision" : "902171c1ddaa1b49294b3899d7230ef7c3a1c5ea",
-        "version" : "1.1.1"
+        "revision" : "ffdb98ecddd876144c0623fc52632ab3261c1eb0",
+        "version" : "1.1.2"
       }
     },
     {

@@ -6,17 +6,15 @@
 //  Copyright © 2019 Riley Testut. All rights reserved.
 //
 
-import Foundation
 import CoreData
+import Foundation
 
 import Harmony
 
 import SwiftyDropbox
 
-extension Version
-{
-    init?(metadata: Files.FileMetadata)
-    {        
+extension Version {
+    init?(metadata: Files.FileMetadata) {
         self.init(identifier: metadata.rev, date: metadata.serverModified)
     }
 }
