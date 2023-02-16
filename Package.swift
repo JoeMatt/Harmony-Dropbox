@@ -7,7 +7,7 @@ let package = Package(
     name: "Harmony-Dropbox",
     platforms: [
         .iOS(.v12),
-        .tvOS(.v12),
+        .tvOS(.v13),
         .macCatalyst(.v13),
         .macOS(.v12),
     ],
@@ -28,7 +28,9 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/dropbox/SwiftyDropbox.git", from: "9.1.0"),
+//        .package(url: "https://github.com/dropbox/SwiftyDropbox.git", from: "9.1.0"),
+		// Use my branch for fixed tvOS support
+		.package(url: "https://github.com/JoeMatt/SwiftyDropbox.git", branch: "tvOS"),
         .package(url: "https://github.com/JoeMatt/Roxas.git", from: "1.2.0"),
         .package(url: "https://github.com/JoeMatt/Harmony.git", from: "1.2.4"),
 //        .package(path: "../Harmony"),

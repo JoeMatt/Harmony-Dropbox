@@ -11,7 +11,24 @@ import Foundation
 @_exported import Harmony
 
 #if canImport(UIKit)
-    import UIKit
+import UIKit
+
+	// TODO: For tvOS support, make a PR for SwiftyDropbox with this change.
+/*
+import SwiftyDropbox
+class LoadingViewController: UIViewController {
+	private let loadingSpinner: UIActivityIndicatorView
+
+	override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
+		if #available(iOS 13.0, tvOS 13.0, *) {
+			loadingSpinner = UIActivityIndicatorView(style: .large)
+		} else {
+			loadingSpinner = UIActivityIndicatorView(style: .whiteLarge)
+		}
+		super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
+	}
+}
+*/
 #endif
 
 import SwiftyDropbox
@@ -64,14 +81,17 @@ public class DropboxService: NSObject, Harmony.Service {
     public let localizedName = NSLocalizedString("Dropbox", comment: "")
     public let identifier = "com.rileytestut.Harmony.Dropbox"
 
+
     public var clientID: String? {
         didSet {
             guard let clientID = clientID else { return }
-			#if os(macOS)
-			DropboxClientsManager.setupWithAppKeyDesktop(clientID)
+            #if os(macOS)
+                DropboxClientsManager.setupWithAppKeyDesktop(clientID)
+            #elseif os(tvOS)
+			DropboxClientsManager.reauthorizeClient(clientID)
 			#else
-            DropboxClientsManager.setupWithAppKey(clientID)
-			#endif
+                DropboxClientsManager.setupWithAppKey(clientID)
+            #endif
         }
     }
 
@@ -114,9 +134,12 @@ public extension DropboxService {
                     UIApplication.shared.open(url, options: [:], completionHandler: nil)
                 }
             #else // New OAuth2 Method
+			#if !os(tvOS)
+			// TODO: tvOS auth @JoeMatt
                 DropboxClientsManager.authorizeFromControllerV2(.shared, controller: viewController, loadingStatusDelegate: loadingStatusDelegate, openURL: { url in
                     UIApplication.shared.open(url, options: [:], completionHandler: nil)
                 }, scopeRequest: nil)
+			#endif
             #endif
         }
     #else // Not UIKit
@@ -126,7 +149,7 @@ public extension DropboxService {
             ///     If you need to set up `DropboxClient`/`DropboxTeamClient` without `DropboxClientsManager`,
             ///     you will have to set up the clients with an appropriate `AccessTokenProvider`.
             DropboxClientsManager.authorizeFromControllerV2(
-				sharedApplication: .shared,
+                sharedApplication: .shared,
                 controller: nil,
                 loadingStatusDelegate: nil,
                 openURL: { _ in

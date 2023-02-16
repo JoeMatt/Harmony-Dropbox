@@ -7,20 +7,20 @@
 //
 
 import Harmony
+import Harmony_Dropbox
 import HarmonyExample
 import HarmonyTestData
-import Harmony_Dropbox
 import os.log
 
 #if canImport(UIKit)
-import UIKit
 import RoxasUIKit
+import UIKit
 
 @UIApplicationMain
 final class DropboxAppDelegate: HarmonyExample.AppDelegate {
 	override public func application(_ application: UIApplication, didFinishLaunchingWithOptions options: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 		ServiceManager.shared.services.append(DropboxService.shared)
-		return super.application(application, didFinishLaunchingWithOptions:options)
+		return super.application(application, didFinishLaunchingWithOptions: options)
 	}
 }
 #elseif canImport(AppKit)
@@ -34,5 +34,5 @@ final class DropboxAppDelegate: HarmonyExample.AppDelegate {
 	}
 }
 #else
-#error ("Unsupported platform")
+#error("Unsupported platform")
 #endif

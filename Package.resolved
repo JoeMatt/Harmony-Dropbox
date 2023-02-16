@@ -30,10 +30,10 @@
     {
       "identity" : "swiftydropbox",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/dropbox/SwiftyDropbox.git",
+      "location" : "https://github.com/JoeMatt/SwiftyDropbox.git",
       "state" : {
-        "revision" : "ff2da46242267837818b40ea1062a045840bc944",
-        "version" : "9.1.0"
+        "branch" : "tvOS",
+        "revision" : "f5939b0a8794def2ec845a6cdb83ea6b930bac2c"
       }
     }
   ],
