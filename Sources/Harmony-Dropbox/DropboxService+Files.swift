@@ -14,8 +14,7 @@ import Harmony
 import SwiftyDropbox
 
 public extension DropboxService {
-    func upload(_ file: File, for record: AnyRecord, metadata: [HarmonyMetadataKey: Any], context: NSManagedObjectContext, completionHandler: @escaping (Result<RemoteFile, FileError>) -> Void) -> Progress
-    {
+    func upload(_ file: File, for record: AnyRecord, metadata: [HarmonyMetadataKey: Any], context: NSManagedObjectContext, completionHandler: @escaping (Result<RemoteFile, FileError>) -> Void) -> Progress {
         let progress = Progress.discreteProgress(totalUnitCount: 1)
 
         var didAddChildProgress = false
@@ -63,8 +62,7 @@ public extension DropboxService {
         return progress
     }
 
-    func download(_ remoteFile: RemoteFile, completionHandler: @escaping (Result<File, FileError>) -> Void) -> Progress
-    {
+    func download(_ remoteFile: RemoteFile, completionHandler: @escaping (Result<File, FileError>) -> Void) -> Progress {
         let progress = Progress.discreteProgress(totalUnitCount: 1)
 
         let fileIdentifier = remoteFile.identifier
@@ -104,8 +102,7 @@ public extension DropboxService {
         return progress
     }
 
-    func delete(_ remoteFile: RemoteFile, completionHandler: @escaping (Result<Void, FileError>) -> Void) -> Progress
-    {
+    func delete(_ remoteFile: RemoteFile, completionHandler: @escaping (Result<Void, FileError>) -> Void) -> Progress {
         let progress = Progress.discreteProgress(totalUnitCount: 1)
 
         let fileIdentifier = remoteFile.identifier
@@ -113,8 +110,7 @@ public extension DropboxService {
         do {
             guard let dropboxClient = dropboxClient else { throw AuthenticationError.notAuthenticated }
 
-            let request = dropboxClient.files.deleteV2(path: remoteFile.remoteIdentifier).response(queue: responseQueue)
-                { _, error in
+            let request = dropboxClient.files.deleteV2(path: remoteFile.remoteIdentifier).response(queue: responseQueue) { _, error in
                     do {
                         try self.process(Result(error))
 

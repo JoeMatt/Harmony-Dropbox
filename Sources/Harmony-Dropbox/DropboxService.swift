@@ -106,8 +106,7 @@ public extension DropboxService {
             authorizationCompletionHandlers.append(completionHandler)
 
             #if false // Legacy method
-                DropboxClientsManager.authorizeFromController(UIApplication.shared, controller: viewController)
-                    { url in
+                DropboxClientsManager.authorizeFromController(UIApplication.shared, controller: viewController) { url in
                         UIApplication.shared.open(url, options: [:], completionHandler: nil)
                     }
             #else // New OAuth2 Method
@@ -144,8 +143,7 @@ public extension DropboxService {
         finishAuthentication()
     }
 
-    func deauthenticate(completionHandler: @escaping (Result<Void, DeauthenticationError>) -> Void)
-    {
+    func deauthenticate(completionHandler: @escaping (Result<Void, DeauthenticationError>) -> Void) {
         DropboxClientsManager.unlinkClients()
 
         accountID = nil
@@ -233,10 +231,8 @@ private extension DropboxService {
                 // Retrieved metadata successfully, which means folder exists, so no need to do anything else.
                 guard let error = error else { return completionHandler(.success) }
 
-                if case let .routeError(error, _, _, _) = error, case .path(.notFound) = error.unboxed
-                {
-                    dropboxClient.files.createFolderV2(path: path).response(queue: self.responseQueue)
-                        { _, error in
+                if case let .routeError(error, _, _, _) = error, case .path(.notFound) = error.unboxed {
+                    dropboxClient.files.createFolderV2(path: path).response(queue: self.responseQueue) { _, error in
                             do {
                                 try self.process(Result(error))
 
@@ -317,8 +313,7 @@ extension DropboxService {
         }
     }
 
-    func validateMetadata<T>(_ metadata: [HarmonyMetadataKey: T], completionHandler: @escaping (Result<String, Error>) -> Void)
-    {
+    func validateMetadata<T>(_ metadata: [HarmonyMetadataKey: T], completionHandler: @escaping (Result<String, Error>) -> Void) {
         let fields = metadata.keys.map { FileProperties.PropertyFieldTemplate(name: $0, description_: $0, type: .string_) }
 
         do {
@@ -330,8 +325,7 @@ extension DropboxService {
                 let addedFields = fields.filter { !existingFields.contains($0.name) }
                 guard !addedFields.isEmpty else { return completionHandler(.success(templateID)) }
 
-                dropboxClient.file_properties.templatesUpdateForUser(templateId: templateID, name: nil, description_: nil, addFields: addedFields).response(queue: responseQueue)
-                    { result, error in
+                dropboxClient.file_properties.templatesUpdateForUser(templateId: templateID, name: nil, description_: nil, addFields: addedFields).response(queue: responseQueue) { result, error in
                         do {
                             let result = try self.process(Result(result, error))
 
@@ -347,8 +341,7 @@ extension DropboxService {
                         }
                     }
             } else {
-                dropboxClient.file_properties.templatesListForUser().response(queue: responseQueue)
-                    { result, error in
+                dropboxClient.file_properties.templatesListForUser().response(queue: responseQueue) { result, error in
                         do {
                             let result = try self.process(Result(result, error))
 
@@ -360,14 +353,12 @@ extension DropboxService {
                                     }
                                 }
                             } else {
-                                dropboxClient.file_properties.templatesAddForUser(name: "Harmony", description_: "Harmony syncing metadata.", fields: fields).response(queue: self.responseQueue)
-                                    { result, error in
+                                dropboxClient.file_properties.templatesAddForUser(name: "Harmony", description_: "Harmony syncing metadata.", fields: fields).response(queue: self.responseQueue) { result, error in
                                         do {
                                             let result = try self.process(Result(result, error))
 
                                             let templateID = result.templateId
-                                            self.fetchPropertyGroupTemplate(forTemplateID: templateID)
-                                                { result in
+                                            self.fetchPropertyGroupTemplate(forTemplateID: templateID) { result in
                                                     switch result {
                                                     case .success: completionHandler(.success(templateID))
                                                     case let .failure(error): completionHandler(.failure(error))
@@ -392,8 +383,7 @@ extension DropboxService {
         do {
             guard let dropboxClient = DropboxClientsManager.authorizedClient else { throw AuthenticationError.notAuthenticated }
 
-            dropboxClient.file_properties.templatesGetForUser(templateId: templateID).response(queue: responseQueue)
-                { result, error in
+            dropboxClient.file_properties.templatesGetForUser(templateId: templateID).response(queue: responseQueue) { result, error in
                     do {
                         let result = try self.process(Result(result, error))
                         self.propertyGroupTemplate = (templateID, result)

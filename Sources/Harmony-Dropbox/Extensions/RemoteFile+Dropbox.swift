@@ -14,8 +14,7 @@ import Harmony
 import SwiftyDropbox
 
 extension RemoteFile {
-    convenience init?(file: Files.FileMetadata, metadata: [HarmonyMetadataKey: Any]?, context: NSManagedObjectContext)
-    {
+    convenience init?(file: Files.FileMetadata, metadata: [HarmonyMetadataKey: Any]?, context: NSManagedObjectContext) {
         guard let identifier = file.pathLower, let metadata = file.propertyGroups?.first?.metadata ?? metadata?.compactMapValues({ $0 as? String }) else { return nil }
 
         try? self.init(remoteIdentifier: identifier, versionIdentifier: file.rev, size: Int(file.size), metadata: metadata, context: context)

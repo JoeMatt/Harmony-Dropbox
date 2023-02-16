@@ -10,8 +10,7 @@ import Harmony
 import SwiftyDropbox
 
 extension Result {
-    init<E>(_ value: Success?, _ error: SwiftyDropbox.CallError<E>?) where Failure == DropboxService.CallError<E>
-    {
+    init<E>(_ value: Success?, _ error: SwiftyDropbox.CallError<E>?) where Failure == DropboxService.CallError<E> {
         switch (value, error) {
         case let (value?, _): self = .success(value)
         case let (_, error?): self = .failure(DropboxService.CallError(error))

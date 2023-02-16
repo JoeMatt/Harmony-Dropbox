@@ -14,8 +14,7 @@ import Harmony
 import SwiftyDropbox
 
 public extension DropboxService {
-    func fetchVersions(for record: AnyRecord, completionHandler: @escaping (Result<[Version], RecordError>) -> Void) -> Progress
-    {
+    func fetchVersions(for record: AnyRecord, completionHandler: @escaping (Result<[Version], RecordError>) -> Void) -> Progress {
         let progress = Progress.discreteProgress(totalUnitCount: 1)
 
         do {
@@ -24,8 +23,7 @@ public extension DropboxService {
             try record.perform { managedRecord in
                 guard let remoteRecord = managedRecord.remoteRecord else { throw ValidationError.nilRemoteRecord }
 
-                let request = dropboxClient.files.listRevisions(path: remoteRecord.identifier, limit: 100).response(queue: self.responseQueue)
-                    { result, error in
+                let request = dropboxClient.files.listRevisions(path: remoteRecord.identifier, limit: 100).response(queue: self.responseQueue) { result, error in
                         do {
                             let result = try self.process(Result(result, error))
 

@@ -14,8 +14,7 @@ import Harmony
 import SwiftyDropbox
 
 public extension DropboxService {
-    func fetchAllRemoteRecords(context: NSManagedObjectContext, completionHandler: @escaping (Result<(Set<RemoteRecord>, Data), FetchError>) -> Void) -> Progress
-    {
+    func fetchAllRemoteRecords(context: NSManagedObjectContext, completionHandler: @escaping (Result<(Set<RemoteRecord>, Data), FetchError>) -> Void) -> Progress {
         fetchRemoteRecords(changeToken: nil, updatedStatus: .normal, context: context, completionHandler: { result in
             let result = result.map { updatedRecords, _, changeToken in
                 (updatedRecords, changeToken)
@@ -25,13 +24,11 @@ public extension DropboxService {
         })
     }
 
-    func fetchChangedRemoteRecords(changeToken: Data, context: NSManagedObjectContext, completionHandler: @escaping (Result<(Set<RemoteRecord>, Set<String>, Data), FetchError>) -> Void) -> Progress
-    {
+    func fetchChangedRemoteRecords(changeToken: Data, context: NSManagedObjectContext, completionHandler: @escaping (Result<(Set<RemoteRecord>, Set<String>, Data), FetchError>) -> Void) -> Progress {
         fetchRemoteRecords(changeToken: changeToken, updatedStatus: .updated, context: context, completionHandler: completionHandler)
     }
 
-    private func fetchRemoteRecords(changeToken: Data?, updatedStatus: RecordStatus, context: NSManagedObjectContext, completionHandler: @escaping (Result<(Set<RemoteRecord>, Set<String>, Data), FetchError>) -> Void) -> Progress
-    {
+    private func fetchRemoteRecords(changeToken: Data?, updatedStatus: RecordStatus, context: NSManagedObjectContext, completionHandler: @escaping (Result<(Set<RemoteRecord>, Set<String>, Data), FetchError>) -> Void) -> Progress {
         let progress = Progress.discreteProgress(totalUnitCount: 1)
 
         do {
@@ -43,8 +40,7 @@ public extension DropboxService {
                 templateIDs.append(templateID)
             }
 
-            func fetchAllRecords(cursor: String?, completionHandler: @escaping (Result<(Set<RemoteRecord>, Set<String>, Data), FetchError>) -> Void)
-            {
+            func fetchAllRecords(cursor: String?, completionHandler: @escaping (Result<(Set<RemoteRecord>, Set<String>, Data), FetchError>) -> Void) {
                 var updatedRecords = Set<RemoteRecord>()
                 var deletedRecordIDs = Set<String>()
 
@@ -67,8 +63,7 @@ public extension DropboxService {
                     }
                 }
 
-                func finish<T>(_ result: Files.ListFolderResult?, _ error: SwiftyDropbox.CallError<T>?)
-                {
+                func finish<T>(_ result: Files.ListFolderResult?, _ error: SwiftyDropbox.CallError<T>?) {
                     context.perform {
                         do {
                             let result = try self.process(Result(result, error))
@@ -115,8 +110,7 @@ public extension DropboxService {
         return progress
     }
 
-    func upload(_ record: AnyRecord, metadata: [HarmonyMetadataKey: Any], context: NSManagedObjectContext, completionHandler: @escaping (Result<RemoteRecord, RecordError>) -> Void) -> Progress
-    {
+    func upload(_ record: AnyRecord, metadata: [HarmonyMetadataKey: Any], context: NSManagedObjectContext, completionHandler: @escaping (Result<RemoteRecord, RecordError>) -> Void) -> Progress {
         let progress = Progress.discreteProgress(totalUnitCount: 1)
 
         validateMetadata(metadata) { result in
@@ -174,8 +168,7 @@ public extension DropboxService {
         return progress
     }
 
-    func download(_ record: AnyRecord, version: Version, context: NSManagedObjectContext, completionHandler: @escaping (Result<LocalRecord, RecordError>) -> Void) -> Progress
-    {
+    func download(_ record: AnyRecord, version: Version, context: NSManagedObjectContext, completionHandler: @escaping (Result<LocalRecord, RecordError>) -> Void) -> Progress {
         let progress = Progress.discreteProgress(totalUnitCount: 1)
 
         do {
@@ -184,8 +177,7 @@ public extension DropboxService {
             try record.perform { managedRecord in
                 guard let remoteRecord = managedRecord.remoteRecord else { throw ValidationError.nilRemoteRecord }
 
-                let request = dropboxClient.files.download(path: remoteRecord.identifier, rev: version.identifier).response(queue: self.responseQueue)
-                    { result, error in
+                let request = dropboxClient.files.download(path: remoteRecord.identifier, rev: version.identifier).response(queue: self.responseQueue) { result, error in
                         context.perform {
                             do {
                                 let (_, data) = try self.process(Result(result, error))
@@ -214,8 +206,7 @@ public extension DropboxService {
         return progress
     }
 
-    func delete(_ record: AnyRecord, completionHandler: @escaping (Result<Void, RecordError>) -> Void) -> Progress
-    {
+    func delete(_ record: AnyRecord, completionHandler: @escaping (Result<Void, RecordError>) -> Void) -> Progress {
         let progress = Progress.discreteProgress(totalUnitCount: 1)
 
         do {
@@ -224,8 +215,7 @@ public extension DropboxService {
             try record.perform { managedRecord in
                 guard let remoteRecord = managedRecord.remoteRecord else { throw ValidationError.nilRemoteRecord }
 
-                let request = dropboxClient.files.deleteV2(path: remoteRecord.identifier).response(queue: self.responseQueue)
-                    { _, error in
+                let request = dropboxClient.files.deleteV2(path: remoteRecord.identifier).response(queue: self.responseQueue) { _, error in
                         do {
                             try self.process(Result(error))
 
@@ -247,8 +237,7 @@ public extension DropboxService {
         return progress
     }
 
-    func updateMetadata(_ metadata: [HarmonyMetadataKey: Any], for record: AnyRecord, completionHandler: @escaping (Result<Void, RecordError>) -> Void) -> Progress
-    {
+    func updateMetadata(_ metadata: [HarmonyMetadataKey: Any], for record: AnyRecord, completionHandler: @escaping (Result<Void, RecordError>) -> Void) -> Progress {
         let progress = Progress.discreteProgress(totalUnitCount: 1)
 
         validateMetadata(metadata) { result in
@@ -264,8 +253,7 @@ public extension DropboxService {
                     let removedFields = metadata.filter { $0.value is NSNull }.map { $0.key }
 
                     let propertyGroupUpdate = FileProperties.PropertyGroupUpdate(templateId: templateID, addOrUpdateFields: updatedFields, removeFields: removedFields)
-                    let request = dropboxClient.file_properties.propertiesUpdate(path: remoteRecord.identifier, updatePropertyGroups: [propertyGroupUpdate]).response(queue: self.responseQueue)
-                        { _, error in
+                    let request = dropboxClient.file_properties.propertiesUpdate(path: remoteRecord.identifier, updatePropertyGroups: [propertyGroupUpdate]).response(queue: self.responseQueue) { _, error in
                             do {
                                 try self.process(Result(error))
 
