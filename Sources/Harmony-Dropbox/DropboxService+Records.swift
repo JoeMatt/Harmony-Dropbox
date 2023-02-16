@@ -178,21 +178,21 @@ public extension DropboxService {
                 guard let remoteRecord = managedRecord.remoteRecord else { throw ValidationError.nilRemoteRecord }
 
                 let request = dropboxClient.files.download(path: remoteRecord.identifier, rev: version.identifier).response(queue: self.responseQueue) { result, error in
-                        context.perform {
-                            do {
-                                let (_, data) = try self.process(Result(result, error))
+                    context.perform {
+                        do {
+                            let (_, data) = try self.process(Result(result, error))
 
-                                let decoder = JSONDecoder()
-                                decoder.managedObjectContext = context
+                            let decoder = JSONDecoder()
+                            decoder.managedObjectContext = context
 
-                                let record = try decoder.decode(LocalRecord.self, from: data)
+                            let record = try decoder.decode(LocalRecord.self, from: data)
 
-                                completionHandler(.success(record))
-                            } catch {
-                                completionHandler(.failure(RecordError(record, error)))
-                            }
+                            completionHandler(.success(record))
+                        } catch {
+                            completionHandler(.failure(RecordError(record, error)))
                         }
                     }
+                }
 
                 progress.cancellationHandler = {
                     request.cancel()
@@ -216,14 +216,14 @@ public extension DropboxService {
                 guard let remoteRecord = managedRecord.remoteRecord else { throw ValidationError.nilRemoteRecord }
 
                 let request = dropboxClient.files.deleteV2(path: remoteRecord.identifier).response(queue: self.responseQueue) { _, error in
-                        do {
-                            try self.process(Result(error))
+                    do {
+                        try self.process(Result(error))
 
-                            completionHandler(.success)
-                        } catch {
-                            completionHandler(.failure(RecordError(record, error)))
-                        }
+                        completionHandler(.success)
+                    } catch {
+                        completionHandler(.failure(RecordError(record, error)))
                     }
+                }
 
                 progress.cancellationHandler = {
                     request.cancel()
@@ -254,14 +254,14 @@ public extension DropboxService {
 
                     let propertyGroupUpdate = FileProperties.PropertyGroupUpdate(templateId: templateID, addOrUpdateFields: updatedFields, removeFields: removedFields)
                     let request = dropboxClient.file_properties.propertiesUpdate(path: remoteRecord.identifier, updatePropertyGroups: [propertyGroupUpdate]).response(queue: self.responseQueue) { _, error in
-                            do {
-                                try self.process(Result(error))
+                        do {
+                            try self.process(Result(error))
 
-                                completionHandler(.success)
-                            } catch {
-                                completionHandler(.failure(RecordError(record, error)))
-                            }
+                            completionHandler(.success)
+                        } catch {
+                            completionHandler(.failure(RecordError(record, error)))
                         }
+                    }
 
                     progress.cancellationHandler = {
                         request.cancel()

@@ -111,14 +111,14 @@ public extension DropboxService {
             guard let dropboxClient = dropboxClient else { throw AuthenticationError.notAuthenticated }
 
             let request = dropboxClient.files.deleteV2(path: remoteFile.remoteIdentifier).response(queue: responseQueue) { _, error in
-                    do {
-                        try self.process(Result(error))
+                do {
+                    try self.process(Result(error))
 
-                        completionHandler(.success)
-                    } catch {
-                        completionHandler(.failure(FileError(fileIdentifier, error)))
-                    }
+                    completionHandler(.success)
+                } catch {
+                    completionHandler(.failure(FileError(fileIdentifier, error)))
                 }
+            }
 
             progress.cancellationHandler = {
                 request.cancel()

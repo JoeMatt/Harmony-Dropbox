@@ -67,7 +67,11 @@ public class DropboxService: NSObject, Harmony.Service {
     public var clientID: String? {
         didSet {
             guard let clientID = clientID else { return }
+			#if os(macOS)
+			DropboxClientsManager.setupWithAppKeyDesktop(clientID)
+			#else
             DropboxClientsManager.setupWithAppKey(clientID)
+			#endif
         }
     }
 
@@ -107,8 +111,8 @@ public extension DropboxService {
 
             #if false // Legacy method
                 DropboxClientsManager.authorizeFromController(UIApplication.shared, controller: viewController) { url in
-                        UIApplication.shared.open(url, options: [:], completionHandler: nil)
-                    }
+                    UIApplication.shared.open(url, options: [:], completionHandler: nil)
+                }
             #else // New OAuth2 Method
                 DropboxClientsManager.authorizeFromControllerV2(.shared, controller: viewController, loadingStatusDelegate: loadingStatusDelegate, openURL: { url in
                     UIApplication.shared.open(url, options: [:], completionHandler: nil)
@@ -122,7 +126,7 @@ public extension DropboxService {
             ///     If you need to set up `DropboxClient`/`DropboxTeamClient` without `DropboxClientsManager`,
             ///     you will have to set up the clients with an appropriate `AccessTokenProvider`.
             DropboxClientsManager.authorizeFromControllerV2(
-                .shared,
+				sharedApplication: .shared,
                 controller: nil,
                 loadingStatusDelegate: nil,
                 openURL: { _ in
@@ -233,14 +237,14 @@ private extension DropboxService {
 
                 if case let .routeError(error, _, _, _) = error, case .path(.notFound) = error.unboxed {
                     dropboxClient.files.createFolderV2(path: path).response(queue: self.responseQueue) { _, error in
-                            do {
-                                try self.process(Result(error))
+                        do {
+                            try self.process(Result(error))
 
-                                completionHandler(.success)
-                            } catch {
-                                completionHandler(.failure(error))
-                            }
+                            completionHandler(.success)
+                        } catch {
+                            completionHandler(.failure(error))
                         }
+                    }
                 } else {
                     completionHandler(.failure(CallError(error)))
                 }
@@ -326,53 +330,53 @@ extension DropboxService {
                 guard !addedFields.isEmpty else { return completionHandler(.success(templateID)) }
 
                 dropboxClient.file_properties.templatesUpdateForUser(templateId: templateID, name: nil, description_: nil, addFields: addedFields).response(queue: responseQueue) { result, error in
-                        do {
-                            let result = try self.process(Result(result, error))
+                    do {
+                        let result = try self.process(Result(result, error))
 
-                            let templateID = result.templateId
+                        let templateID = result.templateId
+                        self.fetchPropertyGroupTemplate(forTemplateID: templateID) { result in
+                            switch result {
+                            case .success: completionHandler(.success(templateID))
+                            case let .failure(error): completionHandler(.failure(error))
+                            }
+                        }
+                    } catch {
+                        completionHandler(.failure(error))
+                    }
+                }
+            } else {
+                dropboxClient.file_properties.templatesListForUser().response(queue: responseQueue) { result, error in
+                    do {
+                        let result = try self.process(Result(result, error))
+
+                        if let templateID = result.templateIds.first {
                             self.fetchPropertyGroupTemplate(forTemplateID: templateID) { result in
                                 switch result {
-                                case .success: completionHandler(.success(templateID))
+                                case .success: self.validateMetadata(metadata, completionHandler: completionHandler)
                                 case let .failure(error): completionHandler(.failure(error))
                                 }
                             }
-                        } catch {
-                            completionHandler(.failure(error))
-                        }
-                    }
-            } else {
-                dropboxClient.file_properties.templatesListForUser().response(queue: responseQueue) { result, error in
-                        do {
-                            let result = try self.process(Result(result, error))
+                        } else {
+                            dropboxClient.file_properties.templatesAddForUser(name: "Harmony", description_: "Harmony syncing metadata.", fields: fields).response(queue: self.responseQueue) { result, error in
+                                do {
+                                    let result = try self.process(Result(result, error))
 
-                            if let templateID = result.templateIds.first {
-                                self.fetchPropertyGroupTemplate(forTemplateID: templateID) { result in
-                                    switch result {
-                                    case .success: self.validateMetadata(metadata, completionHandler: completionHandler)
-                                    case let .failure(error): completionHandler(.failure(error))
-                                    }
-                                }
-                            } else {
-                                dropboxClient.file_properties.templatesAddForUser(name: "Harmony", description_: "Harmony syncing metadata.", fields: fields).response(queue: self.responseQueue) { result, error in
-                                        do {
-                                            let result = try self.process(Result(result, error))
-
-                                            let templateID = result.templateId
-                                            self.fetchPropertyGroupTemplate(forTemplateID: templateID) { result in
-                                                    switch result {
-                                                    case .success: completionHandler(.success(templateID))
-                                                    case let .failure(error): completionHandler(.failure(error))
-                                                    }
-                                                }
-                                        } catch {
-                                            completionHandler(.failure(error))
+                                    let templateID = result.templateId
+                                    self.fetchPropertyGroupTemplate(forTemplateID: templateID) { result in
+                                        switch result {
+                                        case .success: completionHandler(.success(templateID))
+                                        case let .failure(error): completionHandler(.failure(error))
                                         }
                                     }
+                                } catch {
+                                    completionHandler(.failure(error))
+                                }
                             }
-                        } catch {
-                            completionHandler(.failure(error))
                         }
+                    } catch {
+                        completionHandler(.failure(error))
                     }
+                }
             }
         } catch {
             completionHandler(.failure(error))
@@ -384,15 +388,15 @@ extension DropboxService {
             guard let dropboxClient = DropboxClientsManager.authorizedClient else { throw AuthenticationError.notAuthenticated }
 
             dropboxClient.file_properties.templatesGetForUser(templateId: templateID).response(queue: responseQueue) { result, error in
-                    do {
-                        let result = try self.process(Result(result, error))
-                        self.propertyGroupTemplate = (templateID, result)
+                do {
+                    let result = try self.process(Result(result, error))
+                    self.propertyGroupTemplate = (templateID, result)
 
-                        completionHandler(.success(result))
-                    } catch {
-                        completionHandler(.failure(error))
-                    }
+                    completionHandler(.success(result))
+                } catch {
+                    completionHandler(.failure(error))
                 }
+            }
         } catch {
             completionHandler(.failure(error))
         }

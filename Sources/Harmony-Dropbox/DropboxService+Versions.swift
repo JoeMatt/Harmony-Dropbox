@@ -24,15 +24,15 @@ public extension DropboxService {
                 guard let remoteRecord = managedRecord.remoteRecord else { throw ValidationError.nilRemoteRecord }
 
                 let request = dropboxClient.files.listRevisions(path: remoteRecord.identifier, limit: 100).response(queue: self.responseQueue) { result, error in
-                        do {
-                            let result = try self.process(Result(result, error))
+                    do {
+                        let result = try self.process(Result(result, error))
 
-                            let versions = result.entries.compactMap(Version.init(metadata:))
-                            completionHandler(.success(versions))
-                        } catch {
-                            completionHandler(.failure(RecordError(record, error)))
-                        }
+                        let versions = result.entries.compactMap(Version.init(metadata:))
+                        completionHandler(.success(versions))
+                    } catch {
+                        completionHandler(.failure(RecordError(record, error)))
                     }
+                }
 
                 progress.cancellationHandler = {
                     request.cancel()

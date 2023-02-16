@@ -29,13 +29,32 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/dropbox/SwiftyDropbox.git", from: "9.1.0"),
-        .package(path: "../Harmony"),
-//        .package(url: "https://github.com/JoeMatt/Harmony.git", from: "1.1.1")
+        .package(url: "https://github.com/JoeMatt/Roxas.git", from: "1.2.0"),
+        .package(url: "https://github.com/JoeMatt/Harmony.git", from: "1.2.4"),
+//        .package(path: "../Harmony"),
     ],
     targets: [
         .target(
             name: "Harmony-Dropbox",
             dependencies: ["SwiftyDropbox", "Harmony"]
+        ),
+        .executableTarget(
+            name: "Harmony-DropboxExample",
+            dependencies: [
+                "Harmony-Dropbox",
+                .product(name: "HarmonyExample", package: "Harmony"),
+                .product(name: "RoxasUI", package: "Roxas", condition: .when(platforms: [.iOS, .tvOS, .macCatalyst])),
+            ],
+            linkerSettings: [
+                .linkedFramework("UIKit", .when(platforms: [.iOS, .tvOS, .macCatalyst])),
+                .linkedFramework("AppKit", .when(platforms: [.macOS])),
+                .linkedFramework("Cocoa", .when(platforms: [.macOS])),
+                .linkedFramework("CoreData"),
+            ]
+        ),
+        .testTarget(
+            name: "Harmony-DropboxTests",
+            dependencies: ["Harmony"]
         ),
     ],
     swiftLanguageVersions: [.v5]
